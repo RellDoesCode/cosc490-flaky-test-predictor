@@ -19,7 +19,6 @@ def train_xgboost(X, y):
     print("\nTraining XGBoost...")
 
     model = XGBClassifier(
-        use_label_encoder=False,
         eval_metric='logloss'
     )
 

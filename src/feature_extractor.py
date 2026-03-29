@@ -7,7 +7,7 @@ def prepare_features(data, drop_runtime=False):
     y = df['label']
 
     # Drop known non-feature columns
-    drop_cols = ['label', 'test_name', 'project', 'module', 'class']
+    drop_cols = ['label', 'test_name', 'project', 'module', 'class', 'Unnamed: 0']
 
     if drop_runtime:
         drop_cols += ['ExecutionTime', 'numCoveredLines', 'numCoveredMethods']
