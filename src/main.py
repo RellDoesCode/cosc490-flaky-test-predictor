@@ -10,7 +10,7 @@ import pandas as pd
 
 
 def main():
-    file_path = "data/flakeflagger/processed_data.csv"
+    file_path = "data/flakeflagger/static_features.csv"
 
     print("Loading dataset...")
     data = load_dataset_from_csv(file_path)
@@ -29,7 +29,7 @@ def main():
     df.to_excel("cleaned_dataset.xlsx", index=False)
 
     # Feature extraction
-    X, y = prepare_features(data, drop_runtime=True)
+    X, y = prepare_features(data, drop_runtime=False)
 
     # Train models
     rf_model = train_random_forest(X, y)

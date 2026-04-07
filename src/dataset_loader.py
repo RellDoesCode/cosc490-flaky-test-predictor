@@ -10,8 +10,8 @@ def load_dataset_from_csv(file_path, drop_runtime=False):
     # Rename label column
     if 'flaky' in df.columns:
         df = df.rename(columns={'flaky': 'label'})
-    else:
-        raise ValueError("Dataset must contain a 'flaky' column")
+    elif 'label' not in df.columns:
+        raise ValueError("Dataset must contain a 'flaky' or 'label' column")
 
     # Optionally drop runtime-heavy features
     if drop_runtime:
