@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Data / output files (large, generated)
+data/flakeflagger/test_files/
+
+# Shell scripts used for setup (not part of the project code)
+pull_test_files.sh
+fix_sparse.sh
