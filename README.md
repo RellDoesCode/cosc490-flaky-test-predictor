@@ -57,24 +57,10 @@ python -m src.main
 
 ### 3. Run on static features
 
-The extracted static features are already committed at `data/flakeflagger/static_features.csv`. To train directly on them:
+The extracted static features are already committed at `data/flakeflagger/static_features.csv`. Switch `main.py` to use it by setting `file_path = "data/flakeflagger/static_features.csv"` and `drop_runtime=False`, then run:
 
 ```bash
-python -c "
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.metrics import classification_report
-
-df = pd.read_csv('data/flakeflagger/static_features.csv')
-X = df.drop(columns=['project', 'test_name', 'label'])
-y = df['label']
-
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-rf = RandomForestClassifier(n_estimators=100, class_weight='balanced', random_state=42)
-print('RF F1:', cross_val_score(rf, X, y, cv=cv, scoring='f1').mean().round(3))
-"
+python -m src.main
 ```
 
 ---
@@ -169,14 +155,14 @@ Evaluated on 22,236 tests (811 flaky, 3.65%) — stratified 5-fold CV:
 
 ### Our approach — Static features only (no runtime instrumentation)
 
-Evaluated on 12,699 tests (269 flaky, 2.12%) matched across 19 of 24 projects — stratified 5-fold CV:
+Evaluated on 12,681 tests (269 flaky, 2.12%) matched across 19 of 24 projects — stratified 5-fold CV:
 
 | Model | Avg F1 | Precision (flaky) | Recall (flaky) |
 |---|---|---|---|
-| Random Forest | 0.443 | 0.31 | 0.75 |
-| XGBoost | 0.659 | 0.84 | 0.54 |
+| Random Forest | 0.442 | 0.31 | 0.75 |
+| XGBoost | 0.634 | 0.78 | 0.54 |
 
-XGBoost on static-only features (F1=0.659) comes within 0.023 of the instrumented baseline (F1=0.682), demonstrating near-equivalent prediction without any runtime data.
+XGBoost on static-only features (F1=0.634) comes within ~0.05 of the instrumented baseline (F1=0.682), demonstrating near-equivalent prediction without any runtime data. Random Forest achieves higher recall (0.75 vs 0.61) at the cost of precision.
 
 ---
 
