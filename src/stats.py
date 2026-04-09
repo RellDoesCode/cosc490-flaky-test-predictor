@@ -25,7 +25,7 @@ def check_imbalance(data):
     print("\n--- Class Balance ---")
     print(f"Flaky ratio: {ratio:.2%}")
 
-    if ratio < 0.2:
+    if ratio < 0.02:
         print("Dataset is imbalanced")
     else:
         print("Dataset is relatively balanced")
