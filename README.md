@@ -71,13 +71,15 @@ The raw `.java` test files are **not committed** to this repo because they total
 
 If you want to re-run or modify the static feature extractor, follow these steps:
 
-### Step 1 — Enable long path support (Windows only)
+### Step 1 — Enable long path support (Windows only, skip on Mac/Linux)
 
-Run this in Git Bash before cloning anything. Some Java repos have deeply nested paths that exceed Windows' 260-character limit:
+Some Java repos have deeply nested paths that exceed Windows' 260-character limit. Run this in Git Bash before cloning:
 
 ```bash
 git config --global core.longpaths true
 ```
+
+Mac and Linux users can skip this step.
 
 ### Step 2 — Create the test_files directory
 
