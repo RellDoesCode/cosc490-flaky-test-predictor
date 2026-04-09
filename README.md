@@ -83,60 +83,101 @@ Mac and Linux users can skip this step.
 
 ### Step 2 — Create the test_files directory
 
+From the project root, run:
+
 ```bash
 mkdir -p data/flakeflagger/test_files
 ```
 
-### Step 3 — Clone each project using sparse checkout
+### Step 3 — Clone all 24 projects
 
-For each of the 24 projects, clone only the test directories to avoid downloading the full repo. Example for logback:
+We use sparse checkout to download only the test source files, not the entire repo. Run each block below from the **project root**. Each block clones one project, switches into it, sets the sparse checkout path, pulls the files, then returns to the project root.
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/qos-ch/logback data/flakeflagger/test_files/qos-ch-logback
-cd data/flakeflagger/test_files/qos-ch-logback
-git sparse-checkout set src/test/java
-git checkout
-cd ../../../..
+cd data/flakeflagger/test_files/qos-ch-logback && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/apache/incubator-dubbo data/flakeflagger/test_files/apache-incubator-dubbo
+cd data/flakeflagger/test_files/apache-incubator-dubbo && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/jknack/handlebars.java data/flakeflagger/test_files/jknack-handlebars
+cd data/flakeflagger/test_files/jknack-handlebars && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/kevinsawicki/http-request data/flakeflagger/test_files/kevinsawicki-http-request
+cd data/flakeflagger/test_files/kevinsawicki-http-request && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/google/jimfs data/flakeflagger/test_files/google-jimfs
+cd data/flakeflagger/test_files/google-jimfs && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/zxing/zxing data/flakeflagger/test_files/zxing-zxing
+cd data/flakeflagger/test_files/zxing-zxing && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/hector-client/hector data/flakeflagger/test_files/hector-client-hector
+cd data/flakeflagger/test_files/hector-client-hector && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/square/okhttp data/flakeflagger/test_files/square-okhttp
+cd data/flakeflagger/test_files/square-okhttp && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/ninjaframework/ninja data/flakeflagger/test_files/ninjaframework-ninja
+cd data/flakeflagger/test_files/ninjaframework-ninja && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/doanduyhai/Achilles data/flakeflagger/test_files/doanduyhai-Achilles
+cd data/flakeflagger/test_files/doanduyhai-Achilles && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/elasticjob/elastic-job-lite data/flakeflagger/test_files/elasticjob-elastic-job-lite
+cd data/flakeflagger/test_files/elasticjob-elastic-job-lite && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/undertow-io/undertow data/flakeflagger/test_files/undertow-io-undertow
+cd data/flakeflagger/test_files/undertow-io-undertow && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/Activiti/Activiti data/flakeflagger/test_files/activiti-activiti
+cd data/flakeflagger/test_files/activiti-activiti && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/apache/ambari data/flakeflagger/test_files/apache-ambari
+cd data/flakeflagger/test_files/apache-ambari && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/apache/commons-exec data/flakeflagger/test_files/apache-commons-exec
+cd data/flakeflagger/test_files/apache-commons-exec && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/apache/hbase data/flakeflagger/test_files/apache-hbase
+cd data/flakeflagger/test_files/apache-hbase && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/apache/httpcomponents-core data/flakeflagger/test_files/apache-httpcore
+cd data/flakeflagger/test_files/apache-httpcore && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/joel-costigliola/assertj-core data/flakeflagger/test_files/joel-costigliola-assertj-core
+cd data/flakeflagger/test_files/joel-costigliola-assertj-core && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/TooTallNate/java-websocket data/flakeflagger/test_files/tootallnate-java-websocket
+cd data/flakeflagger/test_files/tootallnate-java-websocket && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/wildfly/wildfly data/flakeflagger/test_files/wildfly-wildfly
+cd data/flakeflagger/test_files/wildfly-wildfly && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/spring-projects/spring-boot data/flakeflagger/test_files/spring-projects-spring-boot
+cd data/flakeflagger/test_files/spring-projects-spring-boot && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/wro4j/wro4j data/flakeflagger/test_files/wro4j-wro4j
+cd data/flakeflagger/test_files/wro4j-wro4j && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/Alluxio/alluxio data/flakeflagger/test_files/Alluxio-alluxio
+cd data/flakeflagger/test_files/Alluxio-alluxio && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+
+git clone --filter=blob:none --sparse https://github.com/orbit/orbit data/flakeflagger/test_files/orbit-orbit
+cd data/flakeflagger/test_files/orbit-orbit && git sparse-checkout set src/test/java && git checkout && cd ../../../..
 ```
 
-### Step 4 — Full project list
+> **Note:** Some projects (spring-boot, wildfly, activiti, ambari, hbase) are multi-module Maven projects. Their test files may be nested under module subdirectories rather than directly under `src/test/java`. If a project shows 0 matched tests after running the extractor, navigate into that project's folder and run `git ls-tree -r HEAD --name-only | grep src/test/java` to find the correct paths, then re-run sparse checkout with those paths.
 
-The mapping between project names in the CSV and their GitHub repos is defined in `src/static_feature_extractor.py` under `PROJECT_FOLDER_MAP`:
+### Step 4 — Re-run the extractor
 
-| CSV Project Name | GitHub Repo | Folder Name |
-|---|---|---|
-| logback | github.com/qos-ch/logback | qos-ch-logback |
-| incubator-dubbo | github.com/apache/incubator-dubbo | apache-incubator-dubbo |
-| handlebars.java | github.com/jknack/handlebars.java | jknack-handlebars |
-| http-request | github.com/kevinsawicki/http-request | kevinsawicki-http-request |
-| jimfs | github.com/google/jimfs | google-jimfs |
-| zxing | github.com/zxing/zxing | zxing-zxing |
-| hector | github.com/hector-client/hector | hector-client-hector |
-| okhttp | github.com/square/okhttp | square-okhttp |
-| ninja | github.com/ninjaframework/ninja | ninjaframework-ninja |
-| achilles | github.com/doanduyhai/Achilles | doanduyhai-Achilles |
-| elastic-job-lite | github.com/elasticjob/elastic-job-lite | elasticjob-elastic-job-lite |
-| undertow | github.com/undertow-io/undertow | undertow-io-undertow |
-| activiti | github.com/Activiti/Activiti | activiti-activiti |
-| ambari | github.com/apache/ambari | apache-ambari |
-| commons-exec | github.com/apache/commons-exec | apache-commons-exec |
-| hbase | github.com/apache/hbase | apache-hbase |
-| httpcore | github.com/apache/httpcomponents-core | apache-httpcore |
-| assertj-core | github.com/joel-costigliola/assertj-core | joel-costigliola-assertj-core |
-| java-websocket | github.com/TooTallNate/java-websocket | tootallnate-java-websocket |
-| wildfly | github.com/wildfly/wildfly | wildfly-wildfly |
-| spring-boot | github.com/spring-projects/spring-boot | spring-projects-spring-boot |
-| wro4j | github.com/wro4j/wro4j | wro4j-wro4j |
-| alluxio | github.com/Alluxio/alluxio | Alluxio-alluxio |
-| orbit | github.com/orbit/orbit | orbit-orbit |
-
-> **Note:** Multi-module Maven projects (spring-boot, wildfly, activiti, etc.) have test files nested under module subdirectories rather than directly under `src/test/java`. The sparse checkout paths need to be set per module. Use `git ls-tree -r HEAD --name-only | grep src/test/java` inside the cloned repo to find the correct paths, then set sparse checkout accordingly.
-
-### Step 5 — Re-run the extractor
-
-Once the files are in place:
+Once all projects are cloned, from the project root run:
 
 ```bash
+# Mac / Linux
+python3 -m src.static_feature_extractor
+
+# Windows
 python -m src.static_feature_extractor
 ```
 
