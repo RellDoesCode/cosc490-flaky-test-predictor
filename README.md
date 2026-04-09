@@ -131,16 +131,16 @@ git clone --filter=blob:none --sparse https://github.com/undertow-io/undertow da
 cd data/flakeflagger/test_files/undertow-io-undertow && git sparse-checkout set src/test/java && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/Activiti/Activiti data/flakeflagger/test_files/activiti-activiti
-cd data/flakeflagger/test_files/activiti-activiti && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+cd data/flakeflagger/test_files/activiti-activiti && git sparse-checkout disable && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/apache/ambari data/flakeflagger/test_files/apache-ambari
-cd data/flakeflagger/test_files/apache-ambari && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+cd data/flakeflagger/test_files/apache-ambari && git sparse-checkout set ambari-agent/src/test/java ambari-server/src/test/java && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/apache/commons-exec data/flakeflagger/test_files/apache-commons-exec
 cd data/flakeflagger/test_files/apache-commons-exec && git sparse-checkout set src/test/java && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/apache/hbase data/flakeflagger/test_files/apache-hbase
-cd data/flakeflagger/test_files/apache-hbase && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+cd data/flakeflagger/test_files/apache-hbase && git sparse-checkout set hbase-client/src/test/java hbase-server/src/test/java && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/apache/httpcomponents-core data/flakeflagger/test_files/apache-httpcore
 cd data/flakeflagger/test_files/apache-httpcore && git sparse-checkout set src/test/java && git checkout && cd ../../../..
@@ -152,10 +152,10 @@ git clone --filter=blob:none --sparse https://github.com/TooTallNate/java-websoc
 cd data/flakeflagger/test_files/tootallnate-java-websocket && git sparse-checkout set src/test/java && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/wildfly/wildfly data/flakeflagger/test_files/wildfly-wildfly
-cd data/flakeflagger/test_files/wildfly-wildfly && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+cd data/flakeflagger/test_files/wildfly-wildfly && git sparse-checkout disable && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/spring-projects/spring-boot data/flakeflagger/test_files/spring-projects-spring-boot
-cd data/flakeflagger/test_files/spring-projects-spring-boot && git sparse-checkout set src/test/java && git checkout && cd ../../../..
+cd data/flakeflagger/test_files/spring-projects-spring-boot && git sparse-checkout disable && git checkout && cd ../../../..
 
 git clone --filter=blob:none --sparse https://github.com/wro4j/wro4j data/flakeflagger/test_files/wro4j-wro4j
 cd data/flakeflagger/test_files/wro4j-wro4j && git sparse-checkout set src/test/java && git checkout && cd ../../../..
@@ -167,7 +167,10 @@ git clone --filter=blob:none --sparse https://github.com/orbit/orbit data/flakef
 cd data/flakeflagger/test_files/orbit-orbit && git sparse-checkout set src/test/java && git checkout && cd ../../../..
 ```
 
-> **Note:** Some projects (spring-boot, wildfly, activiti, ambari, hbase) are multi-module Maven projects. Their test files may be nested under module subdirectories rather than directly under `src/test/java`. If a project shows 0 matched tests after running the extractor, navigate into that project's folder and run `git ls-tree -r HEAD --name-only | grep src/test/java` to find the correct paths, then re-run sparse checkout with those paths.
+> **Note on multi-module projects:**
+> - **ambari** — test files are in `ambari-agent/` and `ambari-server/` modules (handled above)
+> - **hbase** — test files are in `hbase-client/` and `hbase-server/` modules (handled above)
+> - **wildfly**, **spring-boot**, **activiti** — have too many modules to enumerate; `git sparse-checkout disable` pulls the full repo for these three. They are large (wildfly ~1GB, spring-boot ~500MB, activiti ~300MB). If disk space is a concern, you can skip them — the extractor will report 0 matches for those projects and continue without errors.
 
 ### Step 4 — Re-run the extractor
 
