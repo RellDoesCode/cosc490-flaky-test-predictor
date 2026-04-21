@@ -40,9 +40,19 @@ def extract_features(java_source):
     pkg_match = re.search(r'^\s*package\s+([\w.]+)\s*;', java_source, re.MULTILINE)
     package = pkg_match.group(1).lower() if pkg_match else ''
 
+    num_test_methods = len(re.findall(r'@Test\b', java_source))
+    num_asserts      = len(re.findall(r'\bassert\w*\s*\(', java_source))
+    loc              = len(non_blank_lines)
+
+    # Assertions per test method (density signal)
+    assert_density = round(num_asserts / num_test_methods, 4) if num_test_methods > 0 else 0.0
+    # Lines per test method (complexity signal)
+    loc_per_test   = round(loc / num_test_methods, 4) if num_test_methods > 0 else 0.0
+
     return {
-        'loc':                  len(non_blank_lines),
-        'num_asserts':          len(re.findall(r'\bassert\w*\s*\(', java_source)),
+        # ── Original 16 features ────────────────────────────────────────────
+        'loc':                  loc,
+        'num_asserts':          num_asserts,
         'thread_sleep_count':   len(re.findall(r'Thread\.sleep\s*\(', java_source)),
         'has_thread_sleep':     int(bool(re.search(r'Thread\.sleep\s*\(', java_source))),
         'async_wait_count':     len(re.findall(r'\b(await|wait|CountDownLatch|CyclicBarrier|Semaphore)\b', java_source)),
@@ -50,13 +60,78 @@ def extract_features(java_source):
         'has_file_io':          int(bool(re.search(r'\b(File|FileInputStream|FileOutputStream|Files|FileWriter|FileReader|Path)\b', java_source))),
         'has_network_io':       int(bool(re.search(r'\b(Socket|ServerSocket|URL|HttpURLConnection|HttpClient|OkHttpClient)\b', java_source))),
         'has_concurrency':      int(bool(re.search(r'\b(Thread|ExecutorService|Executor|Future|Runnable|Callable|synchronized)\b', java_source))),
-        'num_test_methods':     len(re.findall(r'@Test\b', java_source)),
+        'num_test_methods':     num_test_methods,
         'num_try_catch':        len(re.findall(r'\bcatch\s*\(', java_source)),
         'has_setup_teardown':   int(bool(re.search(r'@(Before|After|BeforeClass|AfterClass|BeforeEach|AfterEach|BeforeAll|AfterAll)\b', java_source))),
         'num_conditionals':     len(re.findall(r'\b(if|for|while|switch)\s*\(', java_source)),
         'has_random':           int(bool(re.search(r'\b(Random|Math\.random)\b', java_source))),
         'has_system_time':      int(bool(re.search(r'\b(System\.currentTimeMillis|System\.nanoTime|new Date\(\)|LocalDateTime|Instant\.now)\b', java_source))),
         'num_annotations':      len(re.findall(r'(?<!import\s)@[A-Z]\w+', java_source)),
+
+        # ── Extended features ────────────────────────────────────────────────
+        # Density / ratio features
+        'assert_density':       assert_density,
+        'loc_per_test':         loc_per_test,
+
+        # Timing / polling patterns beyond Thread.sleep
+        'has_timeout_annotation': int(bool(re.search(r'@Test\s*\(\s*timeout', java_source))),
+        'timeout_count':        len(re.findall(r'\b(timeout|Timeout|TIMEOUT)\b', java_source)),
+        'polling_count':        len(re.findall(r'\b(awaitility|Awaitility|pollDelay|pollInterval|await\(\)\.atMost)\b', java_source)),
+
+        # Environment / external dependency
+        'has_env_access':       int(bool(re.search(r'\b(System\.getenv|System\.getProperty|System\.setProperty|Properties)\b', java_source))),
+        'has_db_access':        int(bool(re.search(r'\b(Connection|DriverManager|jdbc|DataSource|EntityManager|hibernate|@Transactional)\b', java_source))),
+        'has_injection':        int(bool(re.search(r'@(Autowired|Inject|Resource|Mock|InjectMocks|Spy)\b', java_source))),
+
+        # Static state manipulation (order-dependent test risk)
+        'has_static_field':     int(bool(re.search(r'\bstatic\s+(?!final\s+class|void\s+main)[\w<\[\]]+\s+\w+\s*[=;]', java_source))),
+
+        # Thread interaction primitives
+        'thread_join_count':    len(re.findall(r'\.join\s*\(', java_source)),
+        'notify_count':         len(re.findall(r'\b(notify|notifyAll)\s*\(', java_source)),
+
+        # Exception handling quality
+        'broad_catch_count':    len(re.findall(r'catch\s*\(\s*(Exception|Throwable|RuntimeException)\b', java_source)),
+
+        # IO depth (count not just binary)
+        'file_io_count':        len(re.findall(r'\b(new\s+File|Files\.|FileInputStream|FileOutputStream|FileWriter|FileReader)\s*\(', java_source)),
+        'network_io_count':     len(re.findall(r'\b(new\s+Socket|new\s+URL|openConnection|HttpClient|OkHttpClient)\s*[\.(]', java_source)),
+
+        # Test structure signals
+        'has_rule_annotation':  int(bool(re.search(r'@Rule\b', java_source))),
+        'num_inner_classes':    len(re.findall(r'\bclass\s+\w+', java_source)) - 1,  # subtract outer class
+
+        # ── Import-based features (highly discriminative) ────────────────────
+        # Mocking frameworks = shared/ordered state risk
+        'imports_mockito':      int(bool(re.search(r'import\s+org\.mockito\.', java_source))),
+        'imports_powermock':    int(bool(re.search(r'import\s+org\.powermock\.', java_source))),
+        'imports_easymock':     int(bool(re.search(r'import\s+com\.easymock\.', java_source))),
+
+        # Concurrency imports
+        'imports_concurrent':   int(bool(re.search(r'import\s+java\.util\.concurrent\.', java_source))),
+        'imports_atomic':       int(bool(re.search(r'import\s+java\.util\.concurrent\.atomic\.', java_source))),
+
+        # Network imports
+        'imports_network':      int(bool(re.search(r'import\s+(java\.net\.|org\.apache\.http\.|okhttp3\.)', java_source))),
+
+        # Spring / DI framework imports (shared application context = ordering risk)
+        'imports_spring':       int(bool(re.search(r'import\s+org\.springframework\.', java_source))),
+        'imports_guice':        int(bool(re.search(r'import\s+com\.google\.inject\.', java_source))),
+
+        # Database / persistence imports
+        'imports_jdbc':         int(bool(re.search(r'import\s+(java\.sql\.|javax\.sql\.)', java_source))),
+        'imports_jpa':          int(bool(re.search(r'import\s+(javax\.persistence\.|jakarta\.persistence\.)', java_source))),
+
+        # File system imports
+        'imports_nio':          int(bool(re.search(r'import\s+java\.nio\.', java_source))),
+        'imports_io':           int(bool(re.search(r'import\s+java\.io\.', java_source))),
+
+        # Timing / async helpers
+        'imports_awaitility':   int(bool(re.search(r'import\s+(com\.jayway\.awaitility\.|org\.awaitility\.)', java_source))),
+
+        # Total import count (complexity proxy)
+        'num_imports':          len(re.findall(r'^\s*import\s+', java_source, re.MULTILINE)),
+
         '_package':             package,
     }
 
