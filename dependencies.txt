@@ -3,3 +3,6 @@ openpyxl
 scikit-learn
 xgboost
 shap
+----Added Dependencies----
+imbalanced-learn
+lightgbm

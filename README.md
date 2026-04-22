@@ -44,7 +44,7 @@ cosc490-flaky-test-predictor/
 ### 1. Install dependencies
 
 ```bash
-pip install pandas scikit-learn xgboost openpyxl
+pip install pandas scikit-learn xgboost openpyxl shap imbalanced-learn lightgbm
 ```
 
 ### 2. Run the baseline pipeline
