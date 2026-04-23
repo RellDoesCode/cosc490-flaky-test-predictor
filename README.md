@@ -190,30 +190,43 @@ This regenerates `data/flakeflagger/static_features.csv`.
 
 ## Results
 
-### Baseline — FlakeFlagger pre-extracted features (with runtime data)
+### Baseline comparison — all evaluated on FlakeFlagger (stratified 5-fold CV)
 
-Evaluated on 22,236 tests (811 flaky, 3.65%) — stratified 5-fold CV:
+| Approach | F1 | Precision | Recall | Requires runtime? |
+|---|---|---|---|---|
+| Smell-only (FlakeFlagger smells) | 0.196 | 0.135 | 0.358 | No |
+| History-only (hIndex commit features) | 0.480 | 0.670 | 0.374 | Yes (commit history) |
+| **Our approach — static features** | **0.667** | **0.747** | **0.602** | **No** |
+| Full FlakeFlagger (smell + history + runtime) | 0.727 | 0.784 | 0.678 | Yes (full instrumentation) |
+
+Our static approach outperforms the smell-only baseline by **+0.471 F1** and the history-only baseline by **+0.187 F1**, while sitting only **0.060 below** the fully-instrumented ceiling — with zero test reruns and zero runtime instrumentation.
+
+### Our approach — Static features detail (12,699 tests, 269 flaky, 2.12%)
+
+Best model: LightGBM + SMOTE + threshold optimization — stratified 5-fold CV:
 
 | Model | Avg F1 | Precision (flaky) | Recall (flaky) |
 |---|---|---|---|
-| Random Forest | 0.677 | 0.76 | 0.61 |
-| XGBoost | 0.682 | 0.83 | 0.58 |
+| Random Forest | 0.629 | 0.755 | 0.539 |
+| XGBoost | 0.665 | 0.761 | 0.591 |
+| LightGBM (best) | **0.667** | **0.747** | **0.602** |
 
-### Our approach — Static features only (no runtime instrumentation)
+### Cross-project generalization — Leave-One-Project-Out (LOPO)
 
-Evaluated on 12,681 tests (269 flaky, 2.12%) matched across 19 of 24 projects — stratified 5-fold CV:
+Trained on all projects, tested on each held-out project (15 projects with at least one flaky test):
 
-| Model | Avg F1 | Precision (flaky) | Recall (flaky) |
+| Model | Avg F1 | Avg Precision | Avg Recall |
 |---|---|---|---|
-| Random Forest | 0.442 | 0.31 | 0.75 |
-| XGBoost | 0.634 | 0.78 | 0.54 |
+| Random Forest | 0.001 | 0.001 | 0.001 |
+| XGBoost | 0.051 | 0.124 | 0.051 |
 
-XGBoost on static-only features (F1=0.634) comes within ~0.05 of the instrumented baseline (F1=0.682), demonstrating near-equivalent prediction without any runtime data. Random Forest achieves higher recall (0.75 vs 0.61) at the cost of precision.
+Cross-project generalization is very low, consistent with findings in the flaky test literature: flakiness patterns are highly project-specific. The static features that distinguish flaky from non-flaky tests within one project do not reliably transfer to unseen projects. This is a known open problem — per-project training (as in the within-project CV above) is substantially more effective.
 
 ---
 
-## Static Features Extracted
+## Static Features Extracted (46 total)
 
+### Core structural features
 | Feature | Description |
 |---|---|
 | `loc` | Non-blank lines of code |
@@ -232,3 +245,45 @@ XGBoost on static-only features (F1=0.634) comes within ~0.05 of the instrumente
 | `has_random` | Binary: `Random` or `Math.random()` usage |
 | `has_system_time` | Binary: system time access detected |
 | `num_annotations` | Total annotation count |
+
+### Density / complexity features
+| Feature | Description |
+|---|---|
+| `assert_density` | Assertions per test method |
+| `loc_per_test` | Lines of code per test method |
+| `has_timeout_annotation` | Binary: `@Test(timeout=...)` present |
+| `timeout_count` | Occurrences of timeout-related keywords |
+| `polling_count` | Count of polling/awaiting primitives (Awaitility, etc.) |
+
+### Environment / dependency features
+| Feature | Description |
+|---|---|
+| `has_env_access` | Binary: `System.getenv` / `System.getProperty` access |
+| `has_db_access` | Binary: JDBC, Hibernate, or `@Transactional` present |
+| `has_injection` | Binary: `@Autowired`, `@Mock`, `@Inject`, etc. |
+| `has_static_field` | Binary: static (non-final) field declarations |
+| `thread_join_count` | Number of `.join()` calls |
+| `notify_count` | Number of `notify()` / `notifyAll()` calls |
+| `broad_catch_count` | Catch blocks catching `Exception` / `Throwable` |
+| `file_io_count` | Count of file I/O constructor/method calls |
+| `network_io_count` | Count of network I/O calls |
+| `has_rule_annotation` | Binary: JUnit `@Rule` present |
+| `num_inner_classes` | Number of inner class declarations |
+
+### Import-based features
+| Feature | Description |
+|---|---|
+| `imports_mockito` | Binary: Mockito imported |
+| `imports_powermock` | Binary: PowerMock imported |
+| `imports_easymock` | Binary: EasyMock imported |
+| `imports_concurrent` | Binary: `java.util.concurrent` imported |
+| `imports_atomic` | Binary: `java.util.concurrent.atomic` imported |
+| `imports_network` | Binary: `java.net` / `okhttp3` / Apache HTTP imported |
+| `imports_spring` | Binary: Spring framework imported |
+| `imports_guice` | Binary: Guice DI imported |
+| `imports_jdbc` | Binary: `java.sql` imported |
+| `imports_jpa` | Binary: JPA/Jakarta Persistence imported |
+| `imports_nio` | Binary: `java.nio` imported |
+| `imports_io` | Binary: `java.io` imported |
+| `imports_awaitility` | Binary: Awaitility imported |
+| `num_imports` | Total import statement count |
