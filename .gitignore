@@ -6,6 +6,8 @@ __pycache__/
 
 # Data / output files (large, generated)
 data/flakeflagger/test_files/
+data/flakeflagger/static_features.csv
+cleaned_dataset.xlsx
 
 # Shell scripts used for setup (not part of the project code)
 pull_test_files.sh
