@@ -47,3 +47,42 @@ def _get_shap_values_for_positive_class(explainer, X_array):
         return raw[1]
     else:
         return raw
+
+def run_shap_analysis(model, X, feature_names = None, model_label = "Model", max_display = 20):
+    print(f"\n{'='*60}")
+    print(f" SHAP Analysis - {model_label}")
+    print(f"{'='*60}")
+
+    if feature_names is None:
+        if isinstance(X, pd.DataFrame):
+            feature_names = list(X.columns)
+        elif len(FEATURE_LABELS) == X.shape[1]:
+            feature_names = FEATURE_LABELS
+        elif len(FEATURE_COLS) == X.shape[1]:
+            feature_names = FEATURE_COLS
+        else:
+            feature_names = [f"feature_{i}" for i in range(X.shape[1])]
+
+    X_array = X.values if isinstance(X, pd.DataFrame) else np.array(X)
+
+    print("Computing SHAP values (this may take a moment)...")
+    explainer = shap.TreeExplainer(model)
+    shap_matrix = _get_shap_values_for_positive_class(explainer, X_array)
+
+    mean_abs_shap = np.abs(shap_matrix).mean(axis = 0)
+    ranking_df = pd.DataFrame({
+        'feature': feature_names,
+        'mean_abs_shap': mean_abs_shap,
+    }).sort_values('mean_abs_shap', ascending = False).reset_index(drop = True)
+    ranking_df['rank'] = ranking_df.index + 1
+
+    print(f"\nTop {min(max_display, len(ranking_df))} most important features:\n")
+    print(f" {'Rank':<5} {'Feature':<30} {'Mean |SHAP|'}")
+    print(f" {'-'*5} {'-'*30} {'-'*12}")
+    for _, row in ranking_df.head(max_display).iterrows():
+        print(f" {int(row['rank']):<5} {row['feature']:<30} {row['mean_abs_shap']:.4f}")
+
+    safe_label = model_label.lower().replace(" ", "_")
+    csv_path = os.path.join(RESULTS_DIR, f"shap_feature_ranking_{safe_label}.csv")
+    ranking_df.to_csv(csv_path, index = False)
+    print(f"\nFeature ranking saved to: {csv_path}")
