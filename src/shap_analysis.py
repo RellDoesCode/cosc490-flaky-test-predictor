@@ -112,3 +112,33 @@ def run_shap_analysis(model, X, feature_names = None, model_label = "Model", max
     fig.savefig(bar_path, dpi=150, bbox_inches='tight')
     plt.close(fig)
     print(f"Bar chart saved to: {bar_path}")
+
+    explanation = shap.Explanation(
+        values = shap_matrix,
+        base_values = explainer.expected_value if not isinstance(explainer.expected_value, list) else explainer.expected_value[1],
+        data = X_array,
+        feature_names = feature_names,
+    )
+
+    fig2, ax2 = plt.subplots(figsize=(10, max(6, top_n * 0.4)))
+    shap.plots.beeswarm(
+        explanation,
+        max_display = top_n,
+        show = False,
+        plot_size = None,
+    )
+    plt.title(
+        f"{model_label} - SHAP Beeswarm Plot\n"
+        f"Red = feature value high | Blue = feature value low\n"
+        f"Right of center = pushes toward FLAKY prediction",
+        fontsize = 11, pad = 12,
+    )
+    plt.tight_layout()
+
+    bee_path = os.path.join(RESULTS_DIR, f"shap_beeswarm_{safe_label}.png")
+    plt.savefig(bee_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"Beeswarm plot saved to: {bee_path}")
+
+    print(f"\nSHAP analysis complete for {model_label}.")
+    return ranking_df
