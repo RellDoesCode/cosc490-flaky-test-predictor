@@ -86,3 +86,29 @@ def run_shap_analysis(model, X, feature_names = None, model_label = "Model", max
     csv_path = os.path.join(RESULTS_DIR, f"shap_feature_ranking_{safe_label}.csv")
     ranking_df.to_csv(csv_path, index = False)
     print(f"\nFeature ranking saved to: {csv_path}")
+
+    top_n = min(max_display, len(ranking_df))
+    top_df = ranking_df.head(top_n).iloc[::-1]
+
+    fig, ax = plt.subplots(figsize=(9, max(5, top_n * 0.38)))
+    ax.barh(
+        top_df['feature'],
+        top_df['mean_abs_shap'],
+        color='#3a7abf',
+        edgecolor='white',
+        linewidth=0.5,
+    )
+    ax.set_xlabel("Mean |SHAP value| (average impact on model output)", fontsize=11)
+    ax.set_title(
+        f"{model_label} - Top {top_n} Features by SHAP Importance\n"
+        f"(higher = stronger predictor of flakiness)",
+        fontsize=12, pad=14,
+    )
+    ax.spines[['top', 'right']].set_visible(False)
+    ax.tick_params(axis='y', labelsize=9)
+    plt.tight_layout()
+
+    bar_path = os.path.join(RESULTS_DIR, f"shap_summary_bar_{safe_label}.png")
+    fig.savefig(bar_path, dpi=150, bbox_inches='tight')
+    plt.close(fig)
+    print(f"Bar chart saved to: {bar_path}")
