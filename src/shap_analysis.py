@@ -130,7 +130,7 @@ def run_shap_analysis(model, X, feature_names = None, model_label = "Model", max
     plt.title(
         f"{model_label} - SHAP Beeswarm Plot\n"
         f"Red = feature value high | Blue = feature value low\n"
-        f"Right of center = pushes toward FLAKY prediction",
+        f"Right of center = pushes toward FLAKy prediction",
         fontsize = 11, pad = 12,
     )
     plt.tight_layout()
@@ -143,7 +143,7 @@ def run_shap_analysis(model, X, feature_names = None, model_label = "Model", max
     print(f"\nSHAP analysis complete for {model_label}.")
     return ranking_df
 
-if __name__ = '__main__':
+if __name__ == '__main__':
     from sklearn.ensemble import RandomForestClassifier
     from xgboost import XGBClassifier
 
@@ -157,18 +157,18 @@ if __name__ = '__main__':
     df['label'] = df['label'].astype(int)
 
     X = df[FEATURE_COLS].values
-    Y = df['label'].values
+    y = df['label'].values
     
     print(f"Dataset: {len(df)} tests | flaky: {y.sum()} ({y.mean() * 100:.1f}%)")
 
     print("\nTraining Random Forest for SHAP...")
     rf = RandomForestClassifier(n_estimators = 100, random_state = 42, class_weight = 'balanced')
-    rf.fit(X, Y)
+    rf.fit(X, y)
     run_shap_analysis(rf, X, feature_names = FEATURE_LABELS, model_label = "Random Forest")
 
     print("\nTraining XGBoost for SHAP...")
     xgb = XGBClassifier(eval_metric = 'logloss', verbosity = 0)
-    xgb.fit(X, Y)
+    xgb.fit(X, y)
     run_shap_analysis(xgb, X, feature_names = FEATURE_LABELS, model_label = "XGBoost")
 
     print("\nAll SHAP outputs saved to results/")
