@@ -4,7 +4,7 @@ from src.stats import dataset_stats, check_imbalance, print_sample
 from src.feature_extractor import prepare_features
 from src.models import train_random_forest, train_xgboost
 from src.evaluation import evaluate_model, detailed_evaluation
-# from src.shap_analysis import run_shap_analysis  # optional (needs shap installed)
+from src.shap_analysis import run_shap_analysis, FEATURE_LABELS
 
 import pandas as pd
 
@@ -44,8 +44,9 @@ def main():
     evaluate_model(xgb_model, X, y)
     detailed_evaluation(xgb_model, X, y)
 
-    # Optional SHAP (uncomment when ready)
-    # run_shap_analysis(rf_model, X)
+    print("\nRunning SHAP analysis...")
+    run_shap_analysis(rf_model, X, feature_names = FEATURE_LABELS, model_label = "Random Forest")
+    run_shap_analysis(xgb_model, X, feature_names = FEATURE_LABELS, model_label = "XGBoost")
 
     print("\nPipeline complete.")
 
