@@ -7,13 +7,11 @@ from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_sc
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 
+#This file is part of the second set of ordering experiments
+#This version tests XGBoost
 
 STATIC_FEATURES_CSV = "data/flakeflagger/static_features.csv"
 
-
-# -----------------------------
-# FEATURES
-# -----------------------------
 FEATURE_COLS = [
     'loc', 'num_asserts', 'thread_sleep_count', 'has_thread_sleep',
     'async_wait_count', 'has_async_wait', 'has_file_io', 'has_network_io',
@@ -30,10 +28,6 @@ FEATURE_COLS = [
     'imports_nio', 'imports_io', 'imports_awaitility', 'num_imports',
 ]
 
-
-# -----------------------------
-# LOAD DATA
-# -----------------------------
 def load_data(path):
     df = pd.read_csv(path)
 
@@ -48,10 +42,6 @@ def load_data(path):
 
     return df, features
 
-
-# -----------------------------
-# MODEL
-# -----------------------------
 def build_xgb():
     return XGBClassifier(
         n_estimators=300,
@@ -62,10 +52,6 @@ def build_xgb():
         verbosity=0
     )
 
-
-# -----------------------------
-# THRESHOLD TUNING
-# -----------------------------
 def best_threshold(model, X_val, y_val):
     if len(np.unique(y_val)) < 2:
         return 0.5
@@ -82,16 +68,11 @@ def best_threshold(model, X_val, y_val):
 
     return best_t
 
-
-# -----------------------------
-# SAFE SMOTE (FIXED)
-# -----------------------------
 def safe_smote(X_tr, y_tr):
     try:
         class_counts = Counter(y_tr)
         minority_count = min(class_counts.values())
 
-        # must have at least k+1 samples
         k = min(5, minority_count - 1)
 
         if k >= 1:
@@ -103,10 +84,6 @@ def safe_smote(X_tr, y_tr):
 
     return X_tr, y_tr
 
-
-# -----------------------------
-# EVALUATION
-# -----------------------------
 def evaluate(df, order, features):
     results = []
 
@@ -123,7 +100,6 @@ def evaluate(df, order, features):
         X = train[features].values
         y = train['label'].values
 
-        # split train/val
         try:
             X_tr, X_val, y_tr, y_val = train_test_split(
                 X, y,
@@ -135,7 +111,6 @@ def evaluate(df, order, features):
             X_tr, y_tr = X, y
             X_val, y_val = X, y
 
-        # SAFE SMOTE
         if len(np.unique(y_tr)) > 1:
             X_tr, y_tr = safe_smote(X_tr, y_tr)
 
@@ -160,10 +135,6 @@ def evaluate(df, order, features):
 
     return pd.DataFrame(results)
 
-
-# -----------------------------
-# CURRICULA GENERATION
-# -----------------------------
 def build_curricula(df):
     stats = df.groupby("project")["label"].mean()
     concurrency = df.groupby("project")["has_concurrency"].mean()
@@ -176,17 +147,12 @@ def build_curricula(df):
         "io_high_to_low": io.sort_values(ascending=False).index.tolist(),
     }
 
-    # random baselines
     projects = stats.index.tolist()
     for i in range(10):
         curricula[f"random_{i+1}"] = np.random.permutation(projects).tolist()
 
     return curricula
 
-
-# -----------------------------
-# MAIN
-# -----------------------------
 def main():
     df, features = load_data(STATIC_FEATURES_CSV)
 
@@ -200,7 +166,6 @@ def main():
         print(f"Running {name} ...")
         all_results[name] = evaluate(df, order, features)
 
-    # simple summary
     print("\n=== SUMMARY ===")
     for name, res in all_results.items():
         if res.empty:

@@ -5,6 +5,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from imblearn.over_sampling import SMOTE
 
+#This file is part of the second set of ordering experiments
+#This version tests Random Forest
+
 STATIC_FEATURES_CSV = "data/flakeflagger/static_features.csv"
 
 FEATURE_COLS = [
@@ -83,10 +86,6 @@ def build_rf():
         n_jobs=-1
     )
 
-
-# -----------------------------
-# Threshold tuning
-# -----------------------------
 def find_best_threshold(model, X_val, y_val):
     if len(np.unique(y_val)) < 2:
         return 0.5
